@@ -9,6 +9,8 @@ class PlatesController {
       
         let { plate_title, plate_description, plate_price, ingredients, plate_category } = request.body;
 
+        console.log('user_id',{  plate_title, plate_description, plate_price, ingredients, plate_category })
+
         let plateCategory = plate_category ? plate_category : "refeições"
 
         if (!Array.isArray(ingredients)) {
@@ -20,7 +22,9 @@ class PlatesController {
         }
         const filename = request.file.filename;
 
+       
         try {
+            console.log('oi')
             const [plate_id] = await knex("plates").insert({
                 plate_title,
                 plate_description,
@@ -29,7 +33,7 @@ class PlatesController {
                 avatar: filename,
                 plate_category: plateCategory
             });
-
+            
             for(const ingredient of ingredients){
                 const ingredientsInsert={
                     plate_id,
@@ -110,6 +114,7 @@ class PlatesController {
     
     async delete(request, response) {
         const { id } = request.params;
+
         await knex("plates").where({ id }).delete();
 
         return response.json()
