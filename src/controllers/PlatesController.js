@@ -6,10 +6,10 @@ class PlatesController {
     async create(request, response) {
         const user_id = request.user.id;
 
-      
+
         let { plate_title, plate_description, plate_price, ingredients, plate_category } = request.body;
 
-        console.log('user_id',{  plate_title, plate_description, plate_price, ingredients, plate_category })
+        console.log('user_id', { plate_title, plate_description, plate_price, ingredients, plate_category })
 
         let plateCategory = plate_category ? plate_category : "refeições"
 
@@ -22,7 +22,7 @@ class PlatesController {
         }
         const filename = request.file.filename;
 
-       
+
         try {
             console.log('oi')
             const [plate_id] = await knex("plates").insert({
@@ -33,21 +33,19 @@ class PlatesController {
                 avatar: filename,
                 plate_category: plateCategory
             });
-            
-            for(const ingredient of ingredients){
-                const ingredientsInsert={
+
+            for (const ingredient of ingredients) {
+                const ingredientsInsert = {
                     plate_id,
-                    name:ingredient,
-                    user_id  
+                    name: ingredient,
+                    user_id
                 }
 
                 await knex("ingredients").insert(ingredientsInsert);
-
-                response.status(201).json({ message: "Plate created successfully" });
- 
             }
 
-            
+            response.status(201).json({ message: "Plate created successfully" });
+
         } catch (error) {
 
             response.status(500).json({ error: "Falha ao inserir prato na tabela" });
@@ -84,7 +82,7 @@ class PlatesController {
 
 
 
-                       
+
             if (ingredients && !Array.isArray(ingredients)) {
                 ingredients = [ingredients];
                 await knex("ingredients")
@@ -99,10 +97,10 @@ class PlatesController {
                     };
                 });
 
-         
+
 
                 await knex("ingredients").insert(ingredientsInsert);
-        
+
             }
 
             response.status(200).json({ message: "Prato atualizado com sucesso." });
@@ -111,7 +109,7 @@ class PlatesController {
             response.status(500).json({ error: "Falha ao atualizar prato na tabela" });
         }
     }
-    
+
     async delete(request, response) {
         const { id } = request.params;
 
@@ -129,7 +127,7 @@ class PlatesController {
 
     async admIndex(request, response) {
         const { search } = request.query;
-        const user_id=request.user.id;
+        const user_id = request.user.id;
 
         const plates = await knex("plates")
             .select(["plates.user_id"])
@@ -137,9 +135,9 @@ class PlatesController {
             .leftJoin("ingredients", "plates.id", "=", "ingredients.plate_id")
             .select("plates.*")
             .where(function () {
-                if(user_id){
+                if (user_id) {
                     this.where("users.id", user_id);
-                }          
+                }
                 if (search) {
                     this.where("plates.plate_title", "like", `%${search}%`)
                         .orWhere("ingredients.name", "like", `%${search}%`);
@@ -158,7 +156,7 @@ class PlatesController {
             .join("users", "plates.user_id", "=", "users.id")
             .leftJoin("ingredients", "plates.id", "=", "ingredients.plate_id")
             .select("plates.*")
-            .where(function () {     
+            .where(function () {
                 if (search) {
                     this.where("plates.plate_title", "like", `%${search}%`)
                         .orWhere("ingredients.name", "like", `%${search}%`);
@@ -167,10 +165,10 @@ class PlatesController {
             .distinct("plates.id")
             .orderBy("plates.plate_title", "asc");
 
-        
+
         return response.json(plates);
     }
-   
+
 }
 
 module.exports = PlatesController;
