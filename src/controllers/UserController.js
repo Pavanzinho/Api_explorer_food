@@ -10,25 +10,18 @@ class UserController {
 
         const checkingIfEmailAlreadyExists = await knex("users").where({ email: email }).first();
 
-        ("checando se email já é cadastrado")
         if (checkingIfEmailAlreadyExists) {
             throw new AppError("este email já é cadastrado")
         };
-        ("checagem completa");
-
-        ("criptografando senha ");
+        
         const hashedPassword = await hash(password, 8);
-        ("criptografada com sucesso ")
-
-            ("inserindo dados na tabela de usuários")
+        
         await knex("users").insert({
             name: name,
             email: email,
             password: hashedPassword,
             is_admin: is_adm
         })
-            ("dados inseridos")
-
         response.status(201).json();
     }
 

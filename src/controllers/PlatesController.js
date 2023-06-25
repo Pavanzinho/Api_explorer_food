@@ -110,7 +110,6 @@ class PlatesController {
     
     async delete(request, response) {
         const { id } = request.params;
-
         await knex("plates").where({ id }).delete();
 
         return response.json()

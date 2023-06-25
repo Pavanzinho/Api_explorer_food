@@ -10,10 +10,8 @@ class SessionController {
 
 
         const { email, password } = request.body;
-
         const user = await knex("users").where({ email }).first();
-       
-        //first: garanta que venha somente um.
+
 
 
         if (!user) {
