@@ -7,13 +7,9 @@ const { sign } = require("jsonwebtoken");
 
 class SessionController {
     async create(request, response) {
-
-
         const { email, password } = request.body;
         const user = await knex("users").where({ email }).first();
-
-
-
+  
         if (!user) {
             throw new AppError("Email e, ou senha incorreta", 401);
         }
@@ -24,12 +20,13 @@ class SessionController {
         }
 
         const { secret, expiresIn } = authConfig.jwt;
-        const token = sign({}, secret, {
+        const token = sign({is_admin: user.is_admin}, secret, {
             subject: String(user.id),
             expiresIn
         })
-
+        
         return response.json({ user, token });
+            
 
     }
 }

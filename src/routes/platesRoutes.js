@@ -12,8 +12,7 @@ const ensureAuthenticated = require("../midllewares/ensureAuthenticated")
 platesRoutes.use(ensureAuthenticated);
 platesRoutes.post("/", upload.single("avatar"), platesController.create);
 platesRoutes.delete("/:id", platesController.delete);
-platesRoutes.get('/', platesController.admIndex);
-platesRoutes.get('/client', platesController.clientIndex);
+platesRoutes.get('/', platesController.index);
 platesRoutes.get("/:id", upload.single("avatar"),platesController.show);
 platesRoutes.put("/:id", upload.single("avatar"), platesController.update);
 

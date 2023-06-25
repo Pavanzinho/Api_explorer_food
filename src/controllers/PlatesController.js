@@ -5,12 +5,7 @@ class PlatesController {
 
     async create(request, response) {
         const user_id = request.user.id;
-
-
         let { plate_title, plate_description, plate_price, ingredients, plate_category } = request.body;
-
-        console.log('user_id', { plate_title, plate_description, plate_price, ingredients, plate_category })
-
         let plateCategory = plate_category ? plate_category : "refeições"
 
         if (!Array.isArray(ingredients)) {
@@ -24,7 +19,6 @@ class PlatesController {
 
 
         try {
-            console.log('oi')
             const [plate_id] = await knex("plates").insert({
                 plate_title,
                 plate_description,
@@ -63,6 +57,7 @@ class PlatesController {
                 .select("plate_title", "plate_description", "plate_price", "avatar")
                 .where({ id })
                 .first();
+
             let filename = request.file ? request.file.filename : actuallyData.avatar;
 
             let newData = {
@@ -74,14 +69,9 @@ class PlatesController {
 
             let updateData = { ...actuallyData, ...newData };
 
-
-
             await knex("plates")
                 .where({ id })
                 .update(updateData);
-
-
-
 
             if (ingredients && !Array.isArray(ingredients)) {
                 ingredients = [ingredients];
@@ -96,8 +86,6 @@ class PlatesController {
                         user_id: user_id
                     };
                 });
-
-
 
                 await knex("ingredients").insert(ingredientsInsert);
 
@@ -120,14 +108,15 @@ class PlatesController {
 
     async show(request, response) {
         const { id } = request.params;
-
         const plate = await knex("plates").where({ id }).first();
+
         return response.json(plate)
     }
 
-    async admIndex(request, response) {
+    async index(request, response) {
         const { search } = request.query;
         const user_id = request.user.id;
+        const is_admin = request.user.is_admin
 
         const plates = await knex("plates")
             .select(["plates.user_id"])
@@ -135,7 +124,7 @@ class PlatesController {
             .leftJoin("ingredients", "plates.id", "=", "ingredients.plate_id")
             .select("plates.*")
             .where(function () {
-                if (user_id) {
+                if (is_admin === true) {
                     this.where("users.id", user_id);
                 }
                 if (search) {
@@ -146,29 +135,8 @@ class PlatesController {
             .distinct("plates.id")
             .orderBy("plates.plate_title", "asc");
 
-
         return response.json(plates);
     }
-
-    async clientIndex(request, response) {
-        const { search } = request.query;
-        const plates = await knex("plates")
-            .join("users", "plates.user_id", "=", "users.id")
-            .leftJoin("ingredients", "plates.id", "=", "ingredients.plate_id")
-            .select("plates.*")
-            .where(function () {
-                if (search) {
-                    this.where("plates.plate_title", "like", `%${search}%`)
-                        .orWhere("ingredients.name", "like", `%${search}%`);
-                }
-            })
-            .distinct("plates.id")
-            .orderBy("plates.plate_title", "asc");
-
-
-        return response.json(plates);
-    }
-
 }
 
 module.exports = PlatesController;

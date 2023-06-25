@@ -5,9 +5,8 @@ const IngredientsControllers = require("../controllers/IngredientsController.js"
 const ingredientsControllers = new IngredientsControllers;
 const ensureAuthenticated = require("../midllewares/ensureAuthenticated")
 
+ingredientsRoutes.get('/', ensureAuthenticated, ingredientsControllers.index)
 
-ingredientsRoutes.get('/adm', ensureAuthenticated, ingredientsControllers.admIndex)
-ingredientsRoutes.get('/client', ensureAuthenticated, ingredientsControllers.clientIndex)
 module.exports = ingredientsRoutes;
 
 

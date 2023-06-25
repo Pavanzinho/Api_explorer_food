@@ -7,15 +7,14 @@ class UserController {
 
     async create(request, response) {
         const { name, email, password, is_adm } = request.body;
-
         const checkingIfEmailAlreadyExists = await knex("users").where({ email: email }).first();
 
         if (checkingIfEmailAlreadyExists) {
             throw new AppError("este email já é cadastrado")
         };
-        
+
         const hashedPassword = await hash(password, 8);
-        
+
         await knex("users").insert({
             name: name,
             email: email,
@@ -29,51 +28,52 @@ class UserController {
     async update(request, response) {
         const { name, email, newPassword, oldPassword } = request.body;
         const user_id = request.user.id;
+        const knex = require('knex')(/* configurações da conexão com o banco de dados */);
 
-        const database = await sqliteConnection();
-        const user = await database.get('SELECT * FROM users WHERE id=(?)', [user_id]);
-
-
+        const user = await knex('users')
+            .where('id', user_id)
+            .first();
 
         if (!user) {
-            throw new AppError("Usuário não cadastrado")
+            throw new AppError('Usuário não cadastrado');
         }
 
-        userWithRegisteredEmail = await database.get('SELECT * FROM users WHERE email=(?)', [email])
+        const userWithRegisteredEmail = await knex('users')
+            .where('email', email)
+            .whereNot('id', user_id)
+            .first();
 
-        if (userWithRegisteredEmail && userWithRegisteredEmail.id !== user_id) {
-            throw new AppError("Email já cadastrado!")
+        if (userWithRegisteredEmail) {
+            throw new AppError('Email já cadastrado!');
         }
 
         if (newPassword && !oldPassword) {
-            throw new AppError("Senha antiga não informada!")
+            throw new AppError('Senha antiga não informada!');
         }
 
         if (newPassword && oldPassword) {
-            const checkPassword = await compare(oldPassword, user.password)
+            const isOldPasswordValid = await compare(oldPassword, user.password)
 
-            if (!checkPassword) {
-                throw new AppError("Esta não é sua senha antiga !")
+            if (!isOldPasswordValid) {
+                throw new AppError('Esta não é sua senha antiga!');
             }
         }
 
-        user.name = name ?? user.name;
-        user.email = email ?? user.email;
-        user.password = await hash(newPassword, 8);
+        const updatedUser = {
+            name: name || user.name,
+            email: email || user.email,
+            updated_at: knex.fn.now()
+        };
 
-        await database.run(`
-        UPDATE users SET
-        name=?,
-        email=?,
-        password=?,
-        updated_at= DATETIME('now'),
-        WHERE id =?`,
-            [user.name, user.email, user.password, user_id]
-        );
+        if (newPassword) {
+            updatedUser.password = await hash(newPassword, 8);
+        }
 
-        return res.status(200).json();
+        await knex('users')
+            .where('id', user_id)
+            .update(updatedUser);
 
-
+        return response.status(200).json();
     }
 }
 
