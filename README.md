@@ -1,4 +1,4 @@
-# ExplorerFood Front-end
+# ExplorerFood Back-end
 
 Brief description of the project, highlighting its structured organization, component division, and main functionalities.
 
