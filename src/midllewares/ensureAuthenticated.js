@@ -16,7 +16,7 @@ function ensureAuthentication(request, response, next) {
     }
 
     try {    
-        const { sub: user_id,is_admin } = verify(token, authConfig.jwt.secret) 
+        const { sub: user_id, is_admin } = verify(token, authConfig.jwt.secret) 
         request.user = { 
             id: Number(user_id),
             is_admin:Boolean(is_admin)
