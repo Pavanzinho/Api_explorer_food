@@ -57,6 +57,7 @@ class PlatesController {
       ingredients,
       plate_category,
     } = request.body;
+    console.log("ingredients", ingredients);
     const user_id = request.user.id;
 
     try {
@@ -88,18 +89,21 @@ class PlatesController {
 
       if (ingredients && !Array.isArray(ingredients)) {
         ingredients = [ingredients];
-        await knex("ingredients").where({ plate_id: id }).del();
-
-        const ingredientsInsert = ingredients.map((name) => {
-          return {
-            plate_id: id,
-            name,
-            user_id: user_id,
-          };
-        });
-
-        await knex("ingredients").insert(ingredientsInsert);
       }
+
+      await knex("ingredients").where({ plate_id: id }).del();
+
+      console.log("chegou aq");
+      const ingredientsInsert = ingredients.map((name) => {
+        return {
+          plate_id: id,
+          name,
+          user_id: user_id,
+        };
+      });
+      console.log("ingredientInsert", ingredientsInsert);
+
+      await knex("ingredients").insert(ingredientsInsert);
 
       response.status(200).json({ message: "Prato atualizado com sucesso." });
     } catch (error) {
